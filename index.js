@@ -12,7 +12,9 @@ const PORT = process.env.PORT || 5000;
 
 const mongoURI = process.env.MONGO_URI;
 
-console.log("MongoDB URI:", process.env.MONGO_URI); // Add this before mongoose.connect()
+// Ignore favicon requests
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('Connected to MongoDB'))
