@@ -33,14 +33,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Import routes
-const routes = require('./routes/index');
+const routes = require('./routes/allroutes');
 app.use('/api', routes);
 
-// Import users route directly for demonstration
-const usersRoute = require('./routes/users');
-app.use('/api/users', usersRoute);
 
-app.get('/', (req, res) => {
+app.get('/', ( res) => {
   res.send(`
     <!DOCTYPE html>
     <html lang="en">
