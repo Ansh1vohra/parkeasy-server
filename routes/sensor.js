@@ -1,34 +1,40 @@
 const express = require("express");
 const router = express.Router();
-const mongoose = require("mongoose");
+const { Server } = require("socket.io");
 
-const sensorSchema = new mongoose.Schema({
-  value: Number,
-  sensorNo: Number,
-  timestamp: { type: Date, default: Date.now },
-});
+// WebSocket setup
+let io;
+const initSocket = (server) => {
+  io = new Server(server, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+    },
+  });
 
-// Create a model
-const SensorData = mongoose.model("SensorData", sensorSchema);
+  io.on("connection", (socket) => {
+    console.log("Client connected");
 
-// API Endpoint to Receive IR Sensor Data
-router.post("/ir-sensor", async (req, res) => {
-  try {
-    const { value } = req.body;
+    socket.on("disconnect", () => {
+      console.log("Client disconnected");
+    });
+  });
+};
 
-    if (value === undefined) {
-      return res.status(400).json({ error: "Missing sensor value" });
-    }
+// API Endpoint to Receive Sensor Data (Without Saving to DB)
+router.post("/ultrasonic", async (req, res) => {
+  console.log("Received Data:", req.body);
 
-    // Save data to MongoDB
-    const newData = new SensorData({ value });
-    await newData.save();
+  const { value, sensorNo } = req.body;
 
-    res.json({ message: "IR sensor data received", value });
-  } catch (error) {
-    console.error("Error saving IR sensor data:", error);
-    res.status(500).json({ error: "Internal server error" });
+  // Emit real-time data to connected clients
+  if (io) {
+    io.emit("sensorData", { value, sensorNo });
   }
+
+  res.json({ message: "Data received successfully", data: req.body });
 });
 
-module.exports = router;
+// ✅ Corrected Export
+module.exports = router;  // Export only the router
+module.exports.initSocket = initSocket; // Export initSocket separately
