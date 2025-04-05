@@ -5,7 +5,7 @@ const router = express.Router();
 // Route to create a booking
 router.post("/create", async (req, res) => {
     try {
-        const { userEmail, parkingDuration } = req.body;
+        const { userEmail, parkingDuration, slotNumber } = req.body;
 
         if (parkingDuration <= 0 || parkingDuration > 12) {
             return res.status(400).json({ error: "Invalid parking duration (1-12 hours allowed)" });
@@ -23,7 +23,7 @@ router.post("/create", async (req, res) => {
 
         // Calculate charge
         const totalCharge = parkingDuration === 1 ? 35 : 35 + (parkingDuration - 1) * 25;
-        const slotNumber = 1101;
+        // const slotNumber = 1101;
 
         // Generate QR Code data
         const qrCodeData = `${userEmail}_${Date.now()}_${slotNumber}`;
