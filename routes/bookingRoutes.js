@@ -7,8 +7,18 @@ router.post("/create", async (req, res) => {
     try {
         const { userEmail, parkingDuration } = req.body;
 
-        if (parkingDuration <= 0 || parkingDuration > 24) {
-            return res.status(400).json({ error: "Invalid parking duration (1-24 hours allowed)" });
+        if (parkingDuration <= 0 || parkingDuration > 12) {
+            return res.status(400).json({ error: "Invalid parking duration (1-12 hours allowed)" });
+        }
+
+        // Check for existing active booking on the same slot
+        const activeBooking = await Booking.findOne({
+            slotNumber,
+            expiryTime: { $gt: new Date() }
+        });
+
+        if (activeBooking) {
+            return res.status(400).json({ error: "This slot is already booked during the requested time." });
         }
 
         // Calculate charge
@@ -21,8 +31,6 @@ router.post("/create", async (req, res) => {
         // Calculate expiry time based on parking duration
         const expiryTime = new Date();
         expiryTime.setHours(expiryTime.getHours() + parkingDuration);
-
-
 
         // Store booking in DB
         const newBooking = new Booking({
